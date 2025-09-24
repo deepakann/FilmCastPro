@@ -66,16 +66,29 @@ pipeline {
 
       
 
-        stage('Create Docker Image') {
+        /* stage('Create Docker Image') {
             steps {
                 script {
                     def dockerImage = docker.build(
                         "${DOCKER_REPO}:${DOCKER_IMAGE_TAG}",
-                        "--build-arg SONAR_TOKEN=${SONAR_TOKEN} -f Dockerfile sample-react-app"
+                        "--build-arg SONAR_TOKEN=${SONAR_TOKEN} --build-arg SONAR_HOST_URL=${SONAR_HOST_URL} -f Dockerfile sample-react-app"
                     )
                 }
             }
+        } */
+
+        stage('Create Docker Image') {
+          steps {
+             withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
+                script {
+                    def dockerImage = docker.build(
+                    "${DOCKER_REPO}:${DOCKER_IMAGE_TAG}",
+                    "--build-arg SONAR_TOKEN=${SONAR_TOKEN} --build-arg SONAR_HOST_URL=https://sonarcloud.io -f Dockerfile sample-react-app"
+                )
+            }
         }
+    }
+}
 
         /* stage('Container Image Scanning - Trivy') {
             steps {
