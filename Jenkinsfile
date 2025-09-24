@@ -8,7 +8,8 @@ pipeline {
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
 
         // SonarQube config name in Jenkins
-        // SONARQUBE_ENV = "MySonarQubeServer"
+        SONAR_HOST_URL = 'https://sonarcloud.io'
+        SONAR_TOKEN = credentials('sonarcloud-token')
 
         // Teams Webhook credential ID (Secret Text)
         TEAMS_WEBHOOK_ID = 'teams-webhook'
@@ -34,8 +35,14 @@ pipeline {
             }
         }      
         
-        
-        stage('Build React App') {
+        stage('Run Unit Test') {
+            steps {
+                dir('sample-react-app') {
+                    sh 'npm test'
+                }
+            }
+        }
+        stage('Build React App & Sonar Scan') {
             steps {
                 dir('sample-react-app') {
                     sh 'npm run build'
@@ -57,13 +64,7 @@ pipeline {
             }
         } */
 
-        stage('Run Unit Test') {
-            steps {
-                dir('sample-react-app') {
-                    sh 'npm test'
-                }
-            }
-        }
+      
 
         stage('Create Docker Image') {
             steps {
