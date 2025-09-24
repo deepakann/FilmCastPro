@@ -19,6 +19,9 @@ ARG SONAR_HOST_URL=https://sonarcloud.io
 ENV SONAR_TOKEN=$SONAR_TOKEN
 ENV SONAR_HOST_URL=$SONAR_HOST_URL
 
+# Run tests to generate coverage
+RUN npm test -- --coverage
+
 # Build production files
 RUN npm run build
 
