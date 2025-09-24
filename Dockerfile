@@ -13,20 +13,8 @@ RUN npm install
 # Copy the rest of the source code
 COPY . .
 
-# Pass SonarCloud credentials as build args
-ARG SONAR_TOKEN
-ARG SONAR_HOST_URL=https://sonarcloud.io
-ENV SONAR_TOKEN=$SONAR_TOKEN
-ENV SONAR_HOST_URL=$SONAR_HOST_URL
-
-# Run tests to generate coverage
-RUN npm test -- --coverage
-
 # Build production files
 RUN npm run build
-
-# Run SonarCloud scan (uses your sonar-project.properties)
-RUN npx sonar-scanner -Dsonar.host.url=$SONAR_HOST_URL -Dsonar.token=$SONAR_TOKEN
 
 # Stage 2: Serve with Nginx
 FROM nginx:stable-alpine
