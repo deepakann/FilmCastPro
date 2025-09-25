@@ -42,7 +42,7 @@ pipeline {
                 }
             }
         }
-        stage('Build React App & Sonar Scan') {
+        stage('Build React App') {
             steps {
                 dir('sample-react-app') {
                     sh 'npm run build'
