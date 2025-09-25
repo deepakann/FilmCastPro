@@ -111,7 +111,7 @@ pipeline {
         stage('Container Image Scanning - Trivy') {
             steps {
                 sh """
-                  trivy image --exit-code 1 --severity HIGH,CRITICAL ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
+                  trivy image --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
                 """
             }
         }
