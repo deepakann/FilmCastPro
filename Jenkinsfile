@@ -61,7 +61,7 @@ pipeline {
                             npx sonar-scanner \
                               -Dproject.settings=sonar-project.properties \
                               -Dsonar.host.url=${SONAR_HOST_URL} \
-                              -Dsonar.organization=deepakann
+                              -Dsonar.organization=deepakann \
                               -Dsonar.token=${SONAR_TOKEN}
                         '''
                     }
