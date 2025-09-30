@@ -102,7 +102,7 @@ pipeline {
                 script {
                     def dockerImage = docker.build(
                         "${DOCKER_REPO}:${DOCKER_IMAGE_TAG}",
-                        "--build-arg SONAR_TOKEN=${SONAR_TOKEN} --build-arg SONAR_HOST_URL=${SONAR_HOST_URL} -f Dockerfile sample-react-app"
+                        "-f Dockerfile ."
                     )
                 }
             }
