@@ -1,0 +1,30 @@
+# values.yaml
+replicaCount: 2
+
+image:
+  repository: "dkannaiy/my-sample-react-app"   # From  Deepa Jenkinsfile
+  tag: "latest"                                # Jenkins will override with BUILD_NUMBER
+  pullPolicy: IfNotPresent
+
+containerPort: 80                              # From Deepa Dockerfile
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: "{{ .Values.containerPort }}"
+
+ingress:
+  enabled: false
+  className: "nginx"
+  hosts:
+    - host: filmcastpro.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+
+resources: {}
+
+env:
+  - name: REACT_APP_API_BASE_URL
+    value: "http://api.filmcastpro.local"
