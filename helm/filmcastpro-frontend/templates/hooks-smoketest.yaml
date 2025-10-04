@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "filmcastpro-frontend.fullname" . }}-smoketest
+annotations:
+  "helm.sh/hook": post-install,post-upgrade
+  "helm.sh/hook-delete-policy": before-hook-creation
+spec:
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: curl
+          image: curlimages/curl:8.10.1
+          args:
+            - "-fsS"
+            - "http://{{ include "filmcastpro-frontend.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}"
