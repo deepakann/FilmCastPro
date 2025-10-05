@@ -12,10 +12,6 @@ pipeline {
         TEAMS_WEBHOOK_ID = 'teams-webhook'
     }
 
-    tools {
-        nodejs "Node18"
-    }
-
     stages {
         stage('Checkout') {
             steps {
