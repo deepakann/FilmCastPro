@@ -138,23 +138,23 @@ pipeline {
     }
 
     post {
-        success {
-            withCredentials([string(credentialsId: "${TEAMS_WEBHOOK_ID}", variable: 'TEAMS_WEBHOOK')]) {
-                sh """
-                    curl -H 'Content-Type: application/json' \
-                        -d '{"text":"✅ Build #${env.BUILD_NUMBER} succeeded for ${env.JOB_NAME}"}' \
-                        $TEAMS_WEBHOOK
-                """
-            }
-        }
-        failure {
-            withCredentials([string(credentialsId: "${TEAMS_WEBHOOK_ID}", variable: 'TEAMS_WEBHOOK')]) {
-                sh """
-                    curl -H 'Content-Type: application/json' \
-                        -d '{"text":"❌ Build #${env.BUILD_NUMBER} failed for ${env.JOB_NAME}"}' \
-                        $TEAMS_WEBHOOK
-                """
-            }
+    success {
+        withCredentials([string(credentialsId: 'teams-webhook', variable: 'TEAMS_WEBHOOK')]) {
+            sh """
+              curl -H 'Content-Type: application/json' \
+                -d '{"text":"✅ Build #${env.BUILD_NUMBER} succeeded for ${env.JOB_NAME}"}' \
+                $TEAMS_WEBHOOK
+            """
         }
     }
+    failure {
+        withCredentials([string(credentialsId: 'teams-webhook', variable: 'TEAMS_WEBHOOK')]) {
+            sh """
+              curl -H 'Content-Type: application/json' \
+                -d '{"text":"❌ Build #${env.BUILD_NUMBER} failed for ${env.JOB_NAME}"}' \
+                $TEAMS_WEBHOOK
+            """
+        }
+    }
+}
 }
