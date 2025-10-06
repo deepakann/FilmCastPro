@@ -7,8 +7,6 @@ pipeline {
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
 
         SONAR_HOST_URL = 'https://sonarcloud.io'
-        SONAR_TOKEN = credentials('sonarcloud-token')
-
         TEAMS_WEBHOOK_ID = 'teams-webhook'
     }
 
@@ -43,23 +41,25 @@ pipeline {
             }
         }   
 
-        stage('SonarQube Scanning') {
+        // ✅ Replaced old SonarQube block with working SonarCloud Analysis
+        stage('SonarCloud Analysis') {
             steps {
-                withSonarQubeEnv('SonarCloud') {
-                    dir('sample-react-app') {
+                dir('sample-react-app') {
+                    withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
                         sh '''
-                            echo "Running SonarQube scan..."
+                            echo "🔍 Running SonarCloud Analysis..."
                             npx sonar-scanner \
-                              -Dproject.settings=sonar-project.properties \
-                              -Dsonar.host.url=${SONAR_HOST_URL} \
-                              -Dsonar.organization=vimalathanga \
-                              -Dsonar.token=${SONAR_TOKEN}
+                              -Dsonar.projectKey=filmcastpro-deepa-ci \
+                              -Dsonar.organization=filmcastpro-deepa-ci \
+                              -Dsonar.host.url=https://sonarcloud.io \
+                              -Dsonar.login=$SONAR_TOKEN \
+                              -Dproject.settings=sonar-project.properties
                         '''
                     }
                 }
             }
         }
-                   
+
         stage('Sonar Quality Gate') {
             steps {
                 timeout(time: 1, unit: 'MINUTES') {
@@ -136,12 +136,13 @@ pipeline {
             }
         }
     }
-}
-post {
-    success {
-        echo "✅ Build #${env.BUILD_NUMBER} completed successfully."
-    }
-    failure {
-        echo "❌ Build #${env.BUILD_NUMBER} failed. Please check logs."
+
+    post {
+        success {
+            echo "✅ Build #${env.BUILD_NUMBER} completed successfully."
+        }
+        failure {
+            echo "❌ Build #${env.BUILD_NUMBER} failed. Please check logs."
+        }
     }
 }
