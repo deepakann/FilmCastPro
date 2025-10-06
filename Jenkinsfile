@@ -109,7 +109,7 @@ pipeline {
 stage('Update GitOps Repo for ArgoCD') {
     steps {
         script {
-            withCredentials([usernamePassword(credentialsId: 'github-pat-vimalathanga', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+            withCredentials([usernamePassword(credentialsId: '047996bb-1d7c-44d3-b42d-951584c98120', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
                 sh '''
                     git config --global user.email "vimalathangs203@gmail.com"
                     git config --global user.name "vimalathanga"
