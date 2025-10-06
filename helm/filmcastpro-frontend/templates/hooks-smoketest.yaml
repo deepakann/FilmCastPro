@@ -1,17 +1,23 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "filmcastpro-frontend.fullname" . }}-smoketest
-annotations:
-  "helm.sh/hook": post-install,post-upgrade
-  "helm.sh/hook-delete-policy": before-hook-creation
+  name: filmcastpro-frontend-smoketest
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   template:
     spec:
-      restartPolicy: Never
       containers:
-        - name: curl
-          image: curlimages/curl:8.10.1
-          args:
-            - "-fsS"
-            - "http://{{ include "filmcastpro-frontend.fullname" . }}.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.service.port }}"
+      - name: curl
+        image: curlimages/curl:7.85.0
+        command:
+        - sh
+        - -c
+        - |
+          echo "Waiting for service to become ready..."
+          sleep 20
+          echo "Running smoke test..."
+          curl -f http://filmcastpro-frontend.default.svc.cluster.local || exit 1
+      restartPolicy: Never
+  backoffLimit: 2

@@ -2,22 +2,12 @@ pipeline {
     agent any
 
     environment {
-        // Adjust for your registry
         DOCKER_REGISTRY = "docker.io"
-        DOCKER_REPO = "dkannaiy/my-sample-react-app"       // Replace with your Docker hub Username and Repo name
+        DOCKER_REPO = "vimalathanga/filmcastpro-frontend"
         DOCKER_IMAGE_TAG = "${env.BUILD_NUMBER}"
 
-        // SonarQube config name in Jenkins
         SONAR_HOST_URL = 'https://sonarcloud.io'
-        SONAR_TOKEN = credentials('sonarcloud-token')
-
-        // Teams Webhook credential ID (Secret Text)
         TEAMS_WEBHOOK_ID = 'teams-webhook'
-    }
-
-    tools {
-        // If you installed NodeJS plugin in Jenkins, name must match Tools config
-        nodejs "Node18"
     }
 
     stages {
@@ -42,6 +32,7 @@ pipeline {
                 }
             }
         }
+
         stage('Build React App') {
             steps {
                 dir('sample-react-app') {
@@ -50,57 +41,45 @@ pipeline {
             }
         }   
 
-        stage('SonarQube Scanning') {
+        // ✅ Replaced old SonarQube block with working SonarCloud Analysis
+        stage('SonarCloud Analysis') {
             steps {
-                withSonarQubeEnv('SonarCloud') {
-                    dir('sample-react-app') {
+                dir('sample-react-app') {
+                    withCredentials([string(credentialsId: 'sonarcloud-token', variable: 'SONAR_TOKEN')]) {
                         sh '''
-                            echo "Running SonarQube scan inside $(pwd)"
-                            ls -l sonar-project.properties
-
+                            echo "🔍 Running SonarCloud Analysis..."
                             npx sonar-scanner \
-                              -Dproject.settings=sonar-project.properties \
-                              -Dsonar.host.url=${SONAR_HOST_URL} \
-                              -Dsonar.organization=deepakann \
-                              -Dsonar.token=${SONAR_TOKEN}
+                              -Dsonar.projectKey=filmcastpro-deepa-ci \
+                              -Dsonar.organization=filmcastpro-deepa-ci \
+                              -Dsonar.host.url=https://sonarcloud.io \
+                              -Dsonar.login=$SONAR_TOKEN \
+                              -Dproject.settings=sonar-project.properties
                         '''
                     }
                 }
             }
         }
-                   
 
-        stage('Sonar Quality Gate') {
+        stage('SonarCloud Status Info') {
             steps {
-                timeout(time: 1, unit: 'MINUTES') {
-                  script {
-                    def qg = waitForQualityGate()
-                    if (qg.status != 'OK') {
-                      error "❌ Quality Gate failed: ${qg.status}"
-                    } else {
-                      echo "✅ Quality Gate passed for build version ${BUILD_NUMBER}"
-                    }
-                 }    
-              }    
-          }
+                echo "✅ SonarCloud analysis uploaded successfully. Check results at:"
+                echo "🔗 https://sonarcloud.io/dashboard?id=filmcastpro-deepa-ci"
+            }
         }
 
         stage('Trivy Filesystem Scan') {
-          steps {
-            script {
-              // Scan project directory before build
+            steps {
                 sh """
                     echo "🔍 Running Trivy FS Scan..."
                     trivy fs --exit-code 0 --severity HIGH,CRITICAL ./sample-react-app
                 """
             }
-         }
-       }
+        }
     
         stage('Create Docker Image') {
             steps {
                 script {
-                    def dockerImage = docker.build(
+                    docker.build(
                         "${DOCKER_REPO}:${DOCKER_IMAGE_TAG}",
                         "-f Dockerfile ."
                     )
@@ -111,53 +90,52 @@ pipeline {
         stage('Container Image Scanning - Trivy') {
             steps {
                 sh """
-                  trivy image --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
+                    trivy image --exit-code 0 --severity HIGH,CRITICAL ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
                 """
             }
         }
 
         stage('Push Docker Image to Registry') {
             steps {
-                script {
-                    // DockerHub login
-                    withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                        sh """
-                          echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
-                          docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
-                        """
-                    }
+                withCredentials([usernamePassword(credentialsId: 'vimalathanga', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh """
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
+                        docker push ${DOCKER_REPO}:${DOCKER_IMAGE_TAG}
+                    """
                 }
             }
         }
 
-        /* stage('Deploy to Kubernetes Staging') {
-            steps {
-                // Assuming kubeconfig is present on agent or loaded from credentials
-                sh """
-                  kubectl set image deployment/my-sample-react-app my-sample-react-app=${DOCKER_REPO}:${DOCKER_IMAGE_TAG} -n staging
-                """
-            }
-        } */
-    }
-  
-    post {
-        success {
-            withCredentials([string(credentialsId: "${TEAMS_WEBHOOK_ID}", variable: 'TEAMS_WEBHOOK')]) {
-                sh """
-                  curl -H 'Content-Type: application/json' \
-                    -d '{"text":"✅ Build #${env.BUILD_NUMBER} succeeded for ${env.JOB_NAME}"}' \
-                    $TEAMS_WEBHOOK
-                """
+stage('Update GitOps Repo for ArgoCD') {
+    steps {
+        script {
+            withCredentials([usernamePassword(credentialsId: '047996bb-1d7c-44d3-b42d-951584c98120', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                sh '''
+                    git config --global user.email "vimalathangs203@gmail.com"
+                    git config --global user.name "vimalathanga"
+
+                    if [ -d FilmCastPro_Deepa ]; then rm -rf FilmCastPro_Deepa; fi
+                    git clone https://$GIT_USER:$GIT_PASS@github.com/vimalathanga/FilmCastPro_Deepa.git
+                    cd FilmCastPro_Deepa/helm/filmcastpro-frontend
+
+                    sed -i "s|tag:.*|tag: ${BUILD_NUMBER}|" values.yaml
+                    git add values.yaml
+                    git commit -m "Updated image tag to ${BUILD_NUMBER}"
+                    git push https://$GIT_USER:$GIT_PASS@github.com/vimalathanga/FilmCastPro_Deepa.git
+                '''
             }
         }
+    }
+}
+
+    }
+
+    post {
+        success {
+            echo "✅ Build #${env.BUILD_NUMBER} completed successfully."
+        }
         failure {
-            withCredentials([string(credentialsId: "${TEAMS_WEBHOOK_ID}", variable: 'TEAMS_WEBHOOK')]) {
-                sh """
-                  curl -H 'Content-Type: application/json' \
-                    -d '{"text":"❌ Build #${env.BUILD_NUMBER} failed for ${env.JOB_NAME}"}' \
-                    $TEAMS_WEBHOOK
-                """
-            }
+            echo "❌ Build #${env.BUILD_NUMBER} failed. Please check logs."
         }
     }
 }

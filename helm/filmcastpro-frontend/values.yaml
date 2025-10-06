@@ -2,8 +2,8 @@
 replicaCount: 2
 
 image:
-  repository: "dkannaiy/my-sample-react-app"   # From  Deepa Jenkinsfile
-  tag: "latest"                                # Jenkins will override with BUILD_NUMBER
+  repository: "vimalathanga/filmcastpro-frontend"   # From  Deepa Jenkinsfile
+  tag: "v1"                                # Jenkins will override with BUILD_NUMBER
   pullPolicy: IfNotPresent
 
 containerPort: 80                              # From Deepa Dockerfile
@@ -28,3 +28,5 @@ resources: {}
 env:
   - name: REACT_APP_API_BASE_URL
     value: "http://api.filmcastpro.local"
+imagePullSecrets:
+  - name: dockerhub-creds
