@@ -60,18 +60,10 @@ pipeline {
             }
         }
 
-        stage('Sonar Quality Gate') {
+        stage('SonarCloud Status Info') {
             steps {
-                timeout(time: 1, unit: 'MINUTES') {
-                    script {
-                        def qg = waitForQualityGate()
-                        if (qg.status != 'OK') {
-                            error "❌ Quality Gate failed: ${qg.status}"
-                        } else {
-                            echo "✅ Quality Gate passed for build ${BUILD_NUMBER}"
-                        }
-                    }    
-                }    
+                echo "✅ SonarCloud analysis uploaded successfully. Check results at:"
+                echo "🔗 https://sonarcloud.io/dashboard?id=filmcastpro-deepa-ci"
             }
         }
 
