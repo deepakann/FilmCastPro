@@ -106,27 +106,28 @@ pipeline {
             }
         }
 
-        stage('Update GitOps Repo for ArgoCD') {
-            steps {
-                script {
-                    withCredentials([usernamePassword(credentialsId: '7a747fa5-4c84-4771-89db-8190b6b9a1c4', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
-                        sh '''
-                            git config --global user.email "vimalathangs203@gmail.com"
-                            git config --global user.name "vimalathanga"
+stage('Update GitOps Repo for ArgoCD') {
+    steps {
+        script {
+            withCredentials([usernamePassword(credentialsId: 'github-pat-vimalathanga', usernameVariable: 'GIT_USER', passwordVariable: 'GIT_PASS')]) {
+                sh '''
+                    git config --global user.email "vimalathangs203@gmail.com"
+                    git config --global user.name "vimalathanga"
 
-                            if [ -d FilmCastPro_Deepa ]; then rm -rf FilmCastPro_Deepa; fi
-                            git clone https://$GIT_USER:$GIT_PASS@github.com/vimalathanga/FilmCastPro_Deepa.git
-                            cd FilmCastPro_Deepa/helm/filmcastpro-frontend
+                    if [ -d FilmCastPro_Deepa ]; then rm -rf FilmCastPro_Deepa; fi
+                    git clone https://$GIT_USER:$GIT_PASS@github.com/vimalathanga/FilmCastPro_Deepa.git
+                    cd FilmCastPro_Deepa/helm/filmcastpro-frontend
 
-                            sed -i "s|tag:.*|tag: ${BUILD_NUMBER}|" values.yaml
-                            git add values.yaml
-                            git commit -m "Updated image tag to ${BUILD_NUMBER}"
-                            git push https://$GIT_USER:$GIT_PASS@github.com/vimalathanga/FilmCastPro_Deepa.git
-                        '''
-                    }
-                }
+                    sed -i "s|tag:.*|tag: ${BUILD_NUMBER}|" values.yaml
+                    git add values.yaml
+                    git commit -m "Updated image tag to ${BUILD_NUMBER}"
+                    git push https://$GIT_USER:$GIT_PASS@github.com/vimalathanga/FilmCastPro_Deepa.git
+                '''
             }
         }
+    }
+}
+
     }
 
     post {
