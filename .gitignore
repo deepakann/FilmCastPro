@@ -1,0 +1,59 @@
+# =========================================
+# Terraform (EKS_Cluster and EC2_Jenkins_Infra)
+# =========================================
+ 
+# Ignore Terraform working directories
+EKS_Cluster/.terraform/
+EC2_Jenkins_Infra/.terraform/
+
+# Ignore Terraform state files and backups
+EKS_Cluster/*.tfstate
+EKS_Cluster/*.tfstate.*
+EKS_Cluster/*.backup
+
+EC2_Jenkins_Infra/*.tfstate
+EC2_Jenkins_Infra/*.tfstate.*
+EC2_Jenkins_Infra/*.backup
+ 
+# Ignore Terraform lock files
+EKS_Cluster/.terraform.lock.hcl
+EC2_Jenkins_Infra/.terraform.lock.hcl
+ 
+# Ignore Terraform crash logs and plan files
+EKS_Cluster/crash.log
+EKS_Cluster/*.tfplan
+EC2_Jenkins_Infra/crash.log
+EC2_Jenkins_Infra/*.tfplan
+ 
+# =========================================
+# Node / React app (sample-react-app)
+# =========================================
+sample-react-app/node_modules/
+sample-react-app/build/
+sample-react-app/dist/
+sample-react-app/coverage/
+sample-react-app/.env*
+sample-react-app/npm-debug.log*
+sample-react-app/yarn-debug.log*
+sample-react-app/yarn-error.log*
+ 
+# =========================================
+# Docker / Jenkins / Miscellaneous
+# =========================================
+*.log
+.dockerignore
+
+# System or Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*.DS_Store
+Thumbs.db
+ 
+# Temporary / archive files
+*.zip
+*.tar.gz
+*.tmp
+
+ 
