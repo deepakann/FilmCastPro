@@ -7,7 +7,7 @@ pipeline {
     APP_NAME = "fcp-app"
     DOCKER_REGISTRY = "docker.io"
     DOCKER_REPO = "dkannaiy/fcp-app"
-    DOCKER_TAG = "$(env.BUILD_NUMBER}"
+    DOCKER_TAG = "${env.BUILD_NUMBER}"
     AWS_REGION = "us-east-1"
     KUBE_CONFIG = credentials('eks-kubeconfig')
     HELM_RELEASE = "fcp-app-release"
@@ -32,7 +32,7 @@ stages {
      }
   }
 
-  stage('Build FilmCastPro Application) {
+  stage('Build FilmCastPro Application') {
      steps {
          sh 'npm run build'
      }
