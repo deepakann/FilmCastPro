@@ -9,7 +9,7 @@ pipeline {
     DOCKER_REPO = "dkannaiy/fcp-app"
     DOCKER_TAG = "${env.BUILD_NUMBER}"
     AWS_REGION = "us-east-1"
-    KUBE_CONFIG = credentials('eks-kubeconfig')
+    KUBE_CONFIG = "eks-kubeconfig"
     HELM_RELEASE = "fcp-app-release"
     HELM_CHART_PATH = "helm/fcp-app"
     EKS_NAMESPACE = "staging"
@@ -17,7 +17,7 @@ pipeline {
 
   tools {
     nodejs "Node18"
- }
+  }
 
 stages {
   stage('checkout') {
