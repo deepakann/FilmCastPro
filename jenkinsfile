@@ -61,9 +61,9 @@ stages {
       }
   }
 
-   stage('Deploy to EKS Cluster using Helm') {
-      steps {
-         script {
+  stage('Deploy to EKS Cluster using Helm') {
+    steps {
+        script {
            withCredentials([file(credentialsId: "${KUBE_CONFIG}", variable: 'KUBECONFIG_PATH')]) {
                 sh '''
                   echo "Setting up KubeConfig..."
@@ -87,5 +87,3 @@ stages {
     }
   }
 }
-
-  
