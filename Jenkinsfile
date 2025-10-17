@@ -62,12 +62,25 @@ stages {
   stage('Deploy to EKS Cluster using Helm') {
     steps {
         script {
-           withCredentials([file(credentialsId: "${KUBE_CONFIG}", variable: 'KUBECONFIG_PATH')]) {
-              withAWS(credentials: 'aws-creds', region: "${AWS_REGION}") {
+           withCredentials ([
+             file(credentialsId: "${KUBE_CONFIG}", variable: 'KUBECONFIG_PATH')
+             string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
+             string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
+           ]) {
                 sh '''
+                  set -e
+
+                  export AWS_ACCESS_KEY_ID=$AWS_ACCESS_KEY_ID
+                  export AWS_SECRET_ACCESS_KEY=$AWS_SECRET_ACCESS_KEY
+                  export AWS_DEFAULT_REGION=${AWS_REGION}
+                  
                   echo "Setting up KubeConfig..."
-                  export KUBECONFIG=$KUBECONFIG_PATH
-                  aws eks --region ${AWS_REGION} update-kubeconfig --name filmcastpro-eks-MquqUXuA || true
+                  cp $KUBECONFIG_PATH ./kubeconfig
+                  chmod 600 ./kubeconfig
+                  export KUBECONFIG=./kubeconfig
+
+                  echo "Updating kubeconfig for EKS cluster..."
+                  aws eks --region ${AWS_REGION} update-kubeconfig --name filmcastpro-eks-MquqUXuA --kubeconfig ./kubeconfig
 
                   echo "Testing cluster connectivity..."
                   kubectl get nodes
@@ -88,8 +101,7 @@ stages {
           }
         }  
       }          
-    }
-  }    
+    } 
   /* stage('Update Helm values and push to Git') {
     steps {
       script {
