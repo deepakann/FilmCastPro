@@ -85,5 +85,30 @@ stages {
         }  
       }          
     }
-  }
+  /* stage('Update Helm values and push to Git') {
+    steps {
+      script {
+        sh '''
+          sed -i "s|tag: .*|tag: ${DOCKER_TAG}|" ${HELM_CHART_PATH}/values.yaml
+          git config --global user.email "deepakann77@gmail.com"
+          git config --global user.name "deepakann"
+          git add ${HELM_CHART_PATH}/values.yaml
+          git commit -m "Update image tag to ${DOCKER_TAG} for release ${HELM_RELEASE}"
+          git push origin master
+        '''
+      }
+    }
+  } */
+  /* stage('Trigger ArgoCD Deployment') {
+    steps {
+      withCredentials([string(credentialsId: 'argocd-token', variable: 'ARGOCD_AUTH_TOKEN')]) {
+        sh '''
+          argocd login argocd-server.example.com --grpc-web --username admin --password $ARGOCD_AUTH_TOKEN --insecure
+          argocd app sync ${APP_NAME} --grpc-web --timeout 600
+          argocd app wait ${APP_NAME} --sync --health --timeout 600
+        '''
+      }   
+    }
+  } */ 
+ }
 }
