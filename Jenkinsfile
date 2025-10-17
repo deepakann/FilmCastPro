@@ -66,10 +66,12 @@ stages {
                 sh '''
                   echo "Setting up KubeConfig..."
                   export KUBECONFIG=$KUBECONFIG_PATH
+                  aws eks --region ${AWS_REGION} update-kubeconfig --name filmcastpro-cluster || true
 
                   echo "Deploying Helm Chart..."
                   helm upgrade --install ${HELM_RELEASE} ${HELM_CHART_PATH} \
                      --namespace ${EKS_NAMESPACE} \
+                     --create namespace \
                      --set image.repository=${DOCKER_REPO} \
                      --set image.tag=${DOCKER_TAG} \
                      --wait --timeout 300s || \
