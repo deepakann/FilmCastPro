@@ -1,5 +1,3 @@
-# This file contains stage to do Deployment via Helm and ArgoCD
-
 pipeline {
   agent any
 
