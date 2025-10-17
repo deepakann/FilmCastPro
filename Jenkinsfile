@@ -63,7 +63,7 @@ stages {
     steps {
         script {
            withCredentials ([
-             file(credentialsId: "${KUBE_CONFIG}", variable: 'KUBECONFIG_PATH')
+             file(credentialsId: "${KUBE_CONFIG}", variable: 'KUBECONFIG_PATH'),
              string(credentialsId: 'aws-access-key-id', variable: 'AWS_ACCESS_KEY_ID'),
              string(credentialsId: 'aws-secret-access-key', variable: 'AWS_SECRET_ACCESS_KEY')
            ]) {
