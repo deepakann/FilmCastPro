@@ -1,0 +1,89 @@
+# This file contains stage to do Deployment via Helm and ArgoCD
+
+pipeline {
+  agent any
+
+  environment {
+    APP_NAME = "fcp-app"
+    DOCKER_REGISTRY = "docker.io"
+    DOCKER_REPO = "dkannaiy/fcp-app"
+    DOCKER_TAG = "${env.BUILD_NUMBER}"
+    AWS_REGION = "us-east-1"
+    KUBE_CONFIG = "eks-kubeconfig"
+    HELM_RELEASE = "fcp-app-release"
+    HELM_CHART_PATH = "helm/fcp-app"
+    EKS_NAMESPACE = "staging"
+  }
+
+  tools {
+    nodejs "Node18"
+  }
+
+stages {
+  stage('checkout') {
+     steps {
+       git branch: 'master', url:"https://github.com/deepakann/FilmCastPro.git"
+     }
+  }
+
+  stage('Install Dependencies') {
+     steps {
+         sh 'npm ci'        
+     }
+  }
+
+  stage('Build FilmCastPro Application') {
+     steps {
+         sh 'npm run build'
+     }
+  } 
+  
+
+  stage('Build Docker Image') {
+     steps {
+       script {
+           dockerImage = docker.build("${DOCKER_REPO}:${DOCKER_TAG}", ".")
+       }
+     }
+  }
+
+  stage('Push Docker Image to Docker Hub Registry') {
+      steps {
+         script {
+            // DockerHub login
+             withCredentials([usernamePassword(credentialsId: 'dockerhub-creds', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                 sh """
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin $DOCKER_REGISTRY
+                    docker push ${DOCKER_REPO}:${DOCKER_TAG}
+                 """
+            }
+         }
+      }
+  }
+
+  stage('Deploy to EKS Cluster using Helm') {
+    steps {
+        script {
+           withCredentials([file(credentialsId: "${KUBE_CONFIG}", variable: 'KUBECONFIG_PATH')]) {
+                sh '''
+                  echo "Setting up KubeConfig..."
+                  export KUBECONFIG=$KUBECONFIG_PATH
+
+                  echo "Deploying Helm Chart..."
+                  helm upgrade --install ${HELM_RELEASE} ${HELM_CHART_PATH} \
+                     --namespace ${EKS_NAMESPACE} \
+                     --set image.repository=${DOCKER_REPO} \
+                     --set image.tag=${DOCKER_TAG} \
+                     --wait --timeout 300s || \
+                     (echo "Helm Deployment Failed. Rolling back.." &&\
+                      helm rollback ${HELM_RELEASE} && exit 1)
+
+                  echo "Verifying deployment..."
+                  kubectl rollout status deployment/${APP_NAME} -n ${EKS_NAMESPACE} --timeout=300s
+                '''
+          }
+        }  
+      }          
+    }
+  }
+}
