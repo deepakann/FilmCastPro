@@ -1,4 +1,4 @@
-terraform {
+/* terraform {
     backend "s3" {
         bucket = "filmcastpro-state-bucket"
         key = "terraform.tfstate"
@@ -6,4 +6,4 @@ terraform {
         encrypt = true
         dynamodb_table = "filmcastpro-dynamodb-table"
     }   
-}
+} */

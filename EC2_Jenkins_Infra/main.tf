@@ -111,9 +111,15 @@ resource "aws_instance" "cicd_ec2" {
       "curl \"https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip\" -o \"awscliv2.zip\"",
       "unzip awscliv2.zip",
       "sudo ./aws/install",
-      "aws --version"
+      "aws --version",
+
+      # Instal ArgoCD CLI 
+      "curl -sSL -o argocd-linux-amd64 https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64",
+      "chmod +x argocd-linux-amd64",
+      "sudo mv argocd-linux-amd64 /usr/local/bin/argocd",
+      "argocd version --client"
     ]
-  }  
+  } 
   tags = {
     Name = "EC2-Jenkins-Infra"
   }
