@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ include "filmcastpro-app.fullname" . }}
+  name: {{ include "fcp-app.fullname" . }}
   namespace: {{ .Release.Namespace }}
   annotations:
     kubernetes.io/ingress.class: alb
@@ -19,7 +19,7 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: {{ include "filmcastpro-app.fullname" . }}
+                name: {{ include "fcp-app.fullname" . }}
                 port:
                   number: {{ .Values.service.port }}
 {{- end }}
