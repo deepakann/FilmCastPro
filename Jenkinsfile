@@ -17,7 +17,7 @@ pipeline {
         APP_NAME         = "fcp-app"
         EKS_NAMESPACE    = "default"
         HELM_CHART_PATH  = "./helm/fcp-app"
-        ARGO_PATH  = "./argocd"
+        ARGO_PATH        = "helm/fcp-app"
         KUBECONFIG       = "/var/lib/jenkins/.kube/config"
         ARGOCD_SERVER    = credentials('argocd-server')                 // Update this to your ArgoCD Loadbalancer endpoint
         ARGOCD_USER      = credentials('argocd-username')       // Jenkins credential IDs
