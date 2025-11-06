@@ -45,7 +45,7 @@ service:
   targetPort: 7070
 
 ingress:
-  enabled: true
+  enabled: false
   className: alb
   annotations: {}
     # kubernetes.io/ingress.class: nginx
