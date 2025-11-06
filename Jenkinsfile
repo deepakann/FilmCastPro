@@ -95,15 +95,8 @@ pipeline {
 
                             echo "Checking if ArgoCD application ${APP_NAME} exists..."
                             if ! argocd app get ${APP_NAME} >/dev/null 2>&1; then
-                                echo "⚙️  Creating ArgoCD Application ${APP_NAME}..."
-                                argocd app create ${APP_NAME} \
-                                    --repo https://github.com/deepakann/FilmCastPro.git \
-                                    --path ${ARGO_PATH} \
-                                    --dest-server https://kubernetes.default.svc \
-                                    --dest-namespace ${EKS_NAMESPACE} \
-                                    --sync-policy automated \
-                                    --self-heal \
-                                    --auto-prune
+                                echo "⚙️  ArgoCD Application ${APP_NAME} was already created ..."
+                                kubectl apply -f argocd/filmcastpro-app.yaml -n argocd
                             else
                                 echo "✅ ArgoCD application ${APP_NAME} already exists"
                             fi
