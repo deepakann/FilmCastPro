@@ -96,7 +96,7 @@ pipeline {
                             echo "Checking if ArgoCD application ${APP_NAME} exists..."
                             if ! argocd app get ${APP_NAME} >/dev/null 2>&1; then
                                 echo "⚙️  ArgoCD Application ${APP_NAME} was already created ..."
-                                kubectl apply -f argocd/filmcastpro-app.yaml -n argocd
+                                kubectl apply -f argocd/fcp-app.yaml -n argocd
                             else
                                 echo "✅ ArgoCD application ${APP_NAME} already exists"
                             fi
